@@ -3,7 +3,7 @@
     "description": "An SDK for working with B2 cloud storage.",
     "keywords": ["b2", "storage", "backblaze", "cloud", "filesystem", "backup", "backblaze-b2", "backblaze-api"],
     "homepage": "https://github.com/obregonco/backblaze-b2",
-    "license": "LGPL",
+    "license": "LGPL-3.0-or-later",
     "type": "library",
     "authors": [
         {
