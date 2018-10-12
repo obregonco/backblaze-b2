@@ -265,6 +265,13 @@ class Client
         return $response['authorizationToken'];
     }
 
+    /**
+     * @param Bucket|string $bucket
+     * @param string $filePath
+     * @param bool $appendToken
+     * @param int $tokenTimeout
+     * @return string
+     */
     public function getDownloadUrl($bucket, string $filePath, $appendToken = false, $tokenTimeout = 60)
     {
         if (!$bucket instanceof Bucket) {
@@ -273,13 +280,6 @@ class Client
 
         $baseUrl = strtr($this->downloadUrl, $this->domainAliases);
         $path = $baseUrl . '/file/' . $bucket->getName() . '/' . $filePath;
-        // Based on: https://github.com/yakovkhalinsky/backblaze-b2/issues/12
-        /*$fullDownloadUrl = implode('/', [
-            $this->downloadUrl, //https://d02.instaid.co/
-            'b2api',
-            'v1',
-            'b2_download_file_by_id?fileId=' . $fileId
-        ]);*/
 
         if ($appendToken) {
             $path .= '?Authorization='
@@ -287,6 +287,17 @@ class Client
         }
 
         return $path;
+    }
+
+    /**
+     * @param File $file
+     * @param bool $appendToken
+     * @param int $tokenTimeout
+     * @return string
+     */
+    public function getDownloadUrlForFile(File $file, $appendToken = false, $tokenTimeout = 60)
+    {
+        return $this->getDownloadUrl($file->getBucketId(), $file->getFileName(), $appendToken, $tokenTimeout);
     }
 
     /**
