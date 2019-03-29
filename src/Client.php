@@ -9,7 +9,6 @@ use obregonco\B2\Http\Client as HttpClient;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Container\Container;
 use Illuminate\Filesystem\Filesystem;
-use yii\helpers\ArrayHelper;
 
 class Client
 {
@@ -542,8 +541,8 @@ class Client
         ]);
 
         foreach ($files as $file) {
-            if ($file->getName() === $fileName) {
-                return $file->getId();
+            if ($file->getFileName() === $fileName) {
+                return $file->getFileId();
             }
         }
 
@@ -758,7 +757,7 @@ class Client
             $headers['Authorization'] = $this->authToken;
         }
 
-        $options = ArrayHelper::merge([
+        $options = array_replace_recursive([
             'headers' => $headers,
         ], $options);
 
