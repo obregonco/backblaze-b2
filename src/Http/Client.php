@@ -47,7 +47,12 @@ class Client extends GuzzleClient
         }
 
         if (!$wantsGetContents) {
-            return $response->getBody();
+            if ($response->hasHeader('Content-Length')) {
+                $bodyBytes = $response->getHeader('Content-Length');
+
+                return $response->getBody()->read($bodyBytes);
+            }
+            else return $response->getBody();
         }
 
         return $response->getBody();

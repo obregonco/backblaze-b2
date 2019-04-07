@@ -1,7 +1,7 @@
 ## Backblaze B2 SDK for PHP
 [![Software License](https://img.shields.io/badge/license-LGPL-brightgreen.svg?style=flat-square)](LICENSE.md)
-[![Latest Version](https://img.shields.io/github/release/obregonco/backblaze-b2.svg?style=flat-square)](https://github.com/obregonco/backblaze-b2/releases)
-[![Build Status](https://img.shields.io/travis/obregonco/backblaze-b2.svg?style=flat-square)](https://travis-ci.org/obregonco/backblaze-b2)
+[![Latest Version](https://img.shields.io/github/release/bcarrella/backblaze-b2.svg?style=flat-square)](https://github.com/bcarrella/backblaze-b2/releases)
+[![Build Status](https://img.shields.io/travis/bcarrella/backblaze-b2.svg?style=flat-square)](https://travis-ci.org/bcarrella/backblaze-b2)
 
 `backblaze-b2` is a client library for working with Backblaze's B2 storage service. It aims to make using the service as
 easy as possible by exposing a clear API and taking influence from other SDKs that you may be familiar with.
@@ -24,8 +24,11 @@ $client = new Client('accountId', [
 	'version' => 2, // By default will use version 1
 	'domainAliases' => [ // When you want to use your own domains (using CNAME)
 		'f0001.backblazeb2.com' => 'alias01.mydomain.com',
-	],
-	'largeFileLimit' => 3000000000, // Lower limit for using large files upload support. Default: 3GB
+	], [
+    'largeFileLimit' => 3000000000, // Lower limit for using large files upload support. Default: 3GB
+    'cacheParentDir' => 'your-php-writable-dir',
+    ]
+    
 ]);
 
 // Returns a Bucket object.
@@ -90,7 +93,7 @@ $fileList = $client->listFiles([
 Installation is via Composer:
 
 ```bash
-$ composer require obregonco/backblaze-b2
+$ composer require bcarrella/backblaze-b2
 ```
 
 ## Tests

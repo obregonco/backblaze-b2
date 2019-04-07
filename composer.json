@@ -1,8 +1,17 @@
 {
-    "name": "obregonco/backblaze-b2",
+    "name": "bcarrella/backblaze-b2",
     "description": "An SDK for working with B2 cloud storage.",
-    "keywords": ["b2", "storage", "backblaze", "cloud", "filesystem", "backup", "backblaze-b2", "backblaze-api"],
-    "homepage": "https://github.com/obregonco/backblaze-b2",
+    "keywords": [
+        "b2",
+        "storage",
+        "backblaze",
+        "cloud",
+        "filesystem",
+        "backup",
+        "backblaze-b2",
+        "backblaze-api"
+    ],
+    "homepage": "https://github.com/bcarrella/backblaze-b2",
     "license": "LGPL-3.0-or-later",
     "type": "library",
     "authors": [
@@ -10,20 +19,28 @@
             "name": "Chris White",
             "email": "chris@cwhite.me",
             "homepage": "https://cwhite.me"
-        }, {
+        },
+        {
             "name": "Ahmad Fikrizaman",
             "email": "fikri@runcloud.io",
             "homepage": "https://runcloud.io",
             "role": "CTO"
-        }, {
-		"name": "Ricardo Obregón",
-		"email": "ricardo@obregon.co",
-		"homepage": "http://obregonco",
-		"role": "Founder"
-	}, {
-                "name": "Rick O'Brien",
-                "email": "rick@obregon.co",
-                "homepage": "http://obregonco"
+        },
+        {
+            "name": "Ricardo Obregón",
+            "email": "ricardo@obregon.co",
+            "homepage": "http://obregonco",
+            "role": "Founder"
+        },
+        {
+            "name": "Rick O'Brien",
+            "email": "rick@obregon.co",
+            "homepage": "http://obregonco"
+        },
+        {
+            "name": "Biagio Carrella",
+            "email": "biagio@biagiocarrella.it",
+            "homepage": "https://www.biagiocarrella.it"
         }
     ],
     "require": {

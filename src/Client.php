@@ -2,13 +2,13 @@
 
 namespace obregonco\B2;
 
+use Illuminate\Cache\CacheManager;
+use Illuminate\Container\Container;
+use Illuminate\Filesystem\Filesystem;
 use obregonco\B2\Exceptions\CacheException;
 use obregonco\B2\Exceptions\NotFoundException;
 use obregonco\B2\Exceptions\ValidationException;
 use obregonco\B2\Http\Client as HttpClient;
-use Illuminate\Cache\CacheManager;
-use Illuminate\Container\Container;
-use Illuminate\Filesystem\Filesystem;
 
 class Client
 {
@@ -27,6 +27,8 @@ class Client
     protected $client;
 
     public $version = 1;
+
+    public $cacheParentDir = __DIR__;
 
     /**
      * If you setup CNAME records to point to backblaze servers (for white-label service)
@@ -62,12 +64,15 @@ class Client
             throw new \Exception('Please provide "keyId" and "applicationKey"');
         }
 
-
         if (isset($options['client'])) {
             $this->client = $options['client'];
         } else {
             $this->client = new HttpClient(['exceptions' => false]);
         }
+
+        if (isset($options['cacheParentDir'])) {
+            $this->cacheParentDir = $options['cacheParentDir'];
+        }        
 
         // initialize cache
         $this->createCacheContainer();
@@ -77,12 +82,16 @@ class Client
 
     private function createCacheContainer()
     {
+        if (!file_exists($this->cacheParentDir . '/Cache')) {
+            mkdir($this->cacheParentDir . '/Cache', 0700, true);
+        }
+
         $container = new Container();
         $container['config'] = [
             'cache.default' => 'file',
             'cache.stores.file' => [
                 'driver' => 'file',
-                'path' => __DIR__ . '/Cache',
+                'path' => $this->cacheParentDir . '/Cache',
             ],
         ];
         $container['files'] = new Filesystem;
@@ -282,7 +291,7 @@ class Client
 
         if ($appendToken) {
             $path .= '?Authorization='
-                . $this->getDownloadAuthorization($bucket, dirname($filePath) . '/', $tokenTimeout);
+            . $this->getDownloadAuthorization($bucket, dirname($filePath) . '/', $tokenTimeout);
         }
 
         return $path;
@@ -714,7 +723,6 @@ class Client
     {
         throw new \Exception(__FUNCTION__ . ' has not been implemented yet');
     }
-
 
     /**
      * Authorize the B2 account in order to get an auth token and API/download URLs.
