@@ -28,8 +28,7 @@ $client = new Client('accountId', [
     'largeFileLimit' => 3000000000, // Lower limit for using large files upload support. Default: 3GB
     'cacheParentDir' => 'your-php-writable-dir',
     ]
-    
-]);
+);
 
 // Returns a Bucket object.
 $bucket = $client->createBucket([
