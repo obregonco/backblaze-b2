@@ -18,13 +18,16 @@ This is just a short example, full examples to come on the wiki.
 use obregonco\B2\Client;
 use obregonco\B2\Bucket;
 
-$client = new Client('accountId', [
+$client = new Client('accountId', 
+    [
 	'keyId' => 'your-key-id', // optional if you want to use master key (account Id)
 	'applicationKey' => 'your-application-key',
 	'version' => 2, // By default will use version 1
 	'domainAliases' => [ // When you want to use your own domains (using CNAME)
 		'f0001.backblazeb2.com' => 'alias01.mydomain.com',
-	], [
+	                   ]
+    ],
+    [
     'largeFileLimit' => 3000000000, // Lower limit for using large files upload support. Default: 3GB
     'cacheParentDir' => '/path/to/your-php-writable-dir',
     ]
