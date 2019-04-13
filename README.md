@@ -26,8 +26,9 @@ $client = new Client('accountId', [
 		'f0001.backblazeb2.com' => 'alias01.mydomain.com',
 	], [
     'largeFileLimit' => 3000000000, // Lower limit for using large files upload support. Default: 3GB
-    'cacheParentDir' => 'your-php-writable-dir',
+    'cacheParentDir' => '/path/to/your-php-writable-dir',
     ]
+    
 );
 
 // Returns a Bucket object.
