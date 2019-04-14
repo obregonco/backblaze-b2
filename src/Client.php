@@ -121,11 +121,20 @@ class Client
             );
         }
 
+        $lastVersionOnly = '[    
+            {
+                "daysFromHidingToDeleting": 1,
+                "daysFromUploadingToHiding": null,
+                "fileNamePrefix": ""
+            }
+        ]';
+
         $response = $this->request('POST', '/b2_create_bucket', [
             'json' => [
                 'accountId' => $this->accountId,
                 'bucketName' => $options['BucketName'],
                 'bucketType' => $options['BucketType'],
+                'lifecycleRules' => ((isset($options['KeepLastVersionOnly']) && $options['KeepLastVersionOnly']) ? $lastVersionOnly : null)
             ],
         ]);
 
