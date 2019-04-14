@@ -121,13 +121,13 @@ class Client
             );
         }
 
-        $lastVersionOnly = '[    
-            {
-                "daysFromHidingToDeleting": 1,
-                "daysFromUploadingToHiding": null,
-                "fileNamePrefix": ""
-            }
-        ]';
+        $lastVersionOnly = [    
+            [
+                'daysFromHidingToDeleting' => 1,
+                'daysFromUploadingToHiding' => null,
+                'fileNamePrefix' => '',
+            ]
+        ];
 
         $response = $this->request('POST', '/b2_create_bucket', [
             'json' => [
