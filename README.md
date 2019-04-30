@@ -24,7 +24,7 @@ $client = new Client('accountId', [
 	'version' => 2, // By default will use version 1
 	'domainAliases' => [ // When you want to use your own domains (using CNAME)
 		'f0001.backblazeb2.com' => 'alias01.mydomain.com',
-	                   ]
+	]
     ], [
     'largeFileLimit' => 3 * 1024 * 1024 * 1024, // Lower limit for using large files upload support. Default: 3GB
     'cacheParentDir' => '/path/to/your-php-writable-dir',
