@@ -72,7 +72,7 @@ class Client
 
         if (isset($options['cacheParentDir'])) {
             $this->cacheParentDir = $options['cacheParentDir'];
-        }        
+        }
 
         // initialize cache
         $this->createCacheContainer();
@@ -121,7 +121,7 @@ class Client
             );
         }
 
-        $lastVersionOnly = [    
+        $lastVersionOnly = [
             [
                 'daysFromHidingToDeleting' => 1,
                 'daysFromUploadingToHiding' => null,
