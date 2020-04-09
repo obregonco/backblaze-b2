@@ -277,15 +277,14 @@ class Client
             $bucket = $this->getBucketFromId($bucket);
         }
 
-        $baseUrl = strtr($this->downloadUrl, $this->domainAliases);
-        $path = $baseUrl . '/file/' . $bucket->getName() . '/' . $filePath;
+        $path = $this->downloadUrl . '/file/' . $bucket->getName() . '/' . $filePath;
 
         if ($appendToken) {
             $path .= '?Authorization='
                 . $this->getDownloadAuthorization($bucket, dirname($filePath) . '/', $tokenTimeout);
         }
 
-        return $path;
+        return strtr($path, $this->domainAliases);
     }
 
     /**
