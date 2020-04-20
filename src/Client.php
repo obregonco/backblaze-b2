@@ -46,6 +46,12 @@ class Client
     public $largeFileLimit = 3000000000;
 
     /**
+     * Seconds to remeber authorization
+     * @var int
+     */
+    public $authorizationCacheTime = 60;
+
+    /**
      * Client constructor. Accepts the account ID, application key and an optional array of options.
      * @param string $accountId
      * @param array $authorizationValues
@@ -725,7 +731,7 @@ class Client
         $baseApiUrl = 'https://api.backblazeb2.com';
         $versionPath = '/b2api/v' . $this->version;
 
-        $response = $this->cache->remember('B2-SDK-Authorization', 60,
+        $response = $this->cache->remember('B2-SDK-Authorization', $this->authorizationCacheTime,
             function () use ($keyId, $applicationKey, $baseApiUrl, $versionPath) {
                 return $this->request('GET', $baseApiUrl . $versionPath . '/b2_authorize_account', [
                     'auth' => [$keyId, $applicationKey],
