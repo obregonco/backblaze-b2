@@ -23,6 +23,8 @@ class Client
     protected $apiUrl = '';
     protected $downloadUrl;
     protected $recommendedPartSize;
+    
+    protected $authorizationValues;
 
     protected $client;
 
@@ -61,10 +63,12 @@ class Client
     public function __construct(string $accountId, array $authorizationValues, array $options = [])
     {
         $this->accountId = $accountId;
-        $keyId = $authorizationValues['keyId'] ?? $accountId;
-        $applicationKey = $authorizationValues['applicationKey'];
 
-        if (empty($keyId) or empty($applicationKey)) {
+        if (!isset($authorizationValues['keyId']) or empty($authorizationValues['keyId'])) {
+            $authorizationValues['keyId'] = $accountId;
+        }
+
+        if (empty($authorizationValues['keyId']) or empty($authorizationValues['applicationKey'])) {
             throw new \Exception('Please provide "keyId" and "applicationKey"');
         }
 
@@ -77,8 +81,10 @@ class Client
 
         // initialize cache
         $this->createCacheContainer();
+        
+        $this->authorizationValues = $authorizationValues;
 
-        $this->authorizeAccount($keyId, $applicationKey);
+        $this->authorizeAccount(false);
     }
 
     private function createCacheContainer()
@@ -720,16 +726,21 @@ class Client
         throw new \Exception(__FUNCTION__ . ' has not been implemented yet');
     }
 
-
     /**
      * Authorize the B2 account in order to get an auth token and API/download URLs.
-     * @param string $keyId
-     * @param string $applicationKey
+     * @param bool $forceRefresh
      */
-    protected function authorizeAccount(string $keyId, string $applicationKey)
+    public function authorizeAccount(bool $forceRefresh = false)
     {
+        $keyId = $this->authorizationValues['keyId'];
+        $applicationKey = $this->authorizationValues['applicationKey']; 
+
         $baseApiUrl = 'https://api.backblazeb2.com';
         $versionPath = '/b2api/v' . $this->version;
+
+        if ($forceRefresh === true) {
+            $this->cache->forget('B2-SDK-Authorization');
+        }
 
         $response = $this->cache->remember('B2-SDK-Authorization', $this->authorizationCacheTime,
             function () use ($keyId, $applicationKey, $baseApiUrl, $versionPath) {
