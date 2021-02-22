@@ -23,7 +23,7 @@ class Client
     protected $apiUrl = '';
     protected $downloadUrl;
     protected $recommendedPartSize;
-    
+
     protected $authorizationValues;
 
     protected $client;
@@ -81,7 +81,7 @@ class Client
 
         // initialize cache
         $this->createCacheContainer();
-        
+
         $this->authorizationValues = $authorizationValues;
 
         $this->authorizeAccount(false);
@@ -336,7 +336,7 @@ class Client
 
         if (isset($options['stream'])) {
             $requestOptions['stream'] = $options['stream'];
-            $response = $this->request('GET', $requestUrl, $requestOptions, false, false);
+            $response = $this->request('GET', $requestUrl, $requestOptions, false);
         } else {
             $response = $this->request('GET', $requestUrl, $requestOptions, false);
         }
@@ -733,7 +733,7 @@ class Client
     public function authorizeAccount(bool $forceRefresh = false)
     {
         $keyId = $this->authorizationValues['keyId'];
-        $applicationKey = $this->authorizationValues['applicationKey']; 
+        $applicationKey = $this->authorizationValues['applicationKey'];
 
         $baseApiUrl = 'https://api.backblazeb2.com';
         $versionPath = '/b2api/v' . $this->version;
@@ -764,7 +764,7 @@ class Client
      * @param bool $wantsGetContents
      * @return mixed|string
      */
-    protected function request($method, $uri = null, array $options = [], $asJson = true, $wantsGetContents = true)
+    protected function request($method, $uri = null, array $options = [], $asJson = true)
     {
         $headers = [];
 
@@ -783,6 +783,12 @@ class Client
             $fullUri = $this->apiUrl . $uri;
         }
 
-        return $this->client->request($method, $fullUri, $options, $asJson, $wantsGetContents);
+        $response = $this->client->request($method, $fullUri, $options);
+
+        if ($asJson) {
+            return json_decode($response->getBody(), true);
+        }
+
+        return $response->getBody();
     }
 }

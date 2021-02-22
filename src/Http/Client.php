@@ -43,6 +43,6 @@ class Client extends GuzzleClient
             ErrorHandler::handleErrorResponse($response);
         }
 
-        return $response->getBody();
+        return $response;
     }
 }
