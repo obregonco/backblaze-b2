@@ -4,6 +4,7 @@ namespace obregonco\B2\Http;
 
 use obregonco\B2\ErrorHandler;
 use GuzzleHttp\Client as GuzzleClient;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Client wrapper around Guzzle.
@@ -24,7 +25,7 @@ class Client extends GuzzleClient
      * @param bool $asJson
      * @return mixed|string
      */
-    public function request($method, $uri = null, array $options = [], $asJson = true, $wantsGetContents = true)
+    public function request(string $method, $uri = '', array $options = []): ResponseInterface
     {
         $response = parent::request($method, $uri, $options);
 
@@ -40,14 +41,6 @@ class Client extends GuzzleClient
         }
         if ($response->getStatusCode() !== 200) {
             ErrorHandler::handleErrorResponse($response);
-        }
-
-        if ($asJson) {
-            return json_decode($response->getBody(), true);
-        }
-
-        if (!$wantsGetContents) {
-            return $response->getBody();
         }
 
         return $response->getBody();
