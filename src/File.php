@@ -8,11 +8,15 @@ class File implements \JsonSerializable
     protected $action;
     protected $bucketId;
     protected $contentLength;
+    protected $contentMd5;
     protected $contentSha1;
     protected $contentType;
     protected $fileId;
     protected $fileInfo;
     protected $fileName;
+    protected $fileRetention;
+    protected $legalHold;
+    protected $serverSideEncryption;
     protected $uploadTimestamp;
 
     /**
