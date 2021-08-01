@@ -10,9 +10,13 @@ class Bucket
     protected $bucketId;
     protected $bucketName;
     protected $bucketType;
+    protected $bucketInfo;
     protected $corsRules;
+    protected $fileLockConfiguration;
+    protected $defaultServerSideEncryption;
     protected $lifecycleRules;
     protected $revision;
+    protected $options;
 
     /**
      * Bucket constructor.
