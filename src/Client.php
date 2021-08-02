@@ -19,16 +19,16 @@ class Client
      */
     protected $cache;
 
-    protected $authToken;
-    protected $apiUrl = '';
-    protected $downloadUrl;
+    protected string $authToken;
+    protected string $apiUrl = '';
+    protected string $downloadUrl;
     protected $recommendedPartSize;
 
     protected $authorizationValues;
 
     protected $client;
 
-    public $version = 1;
+    public int $version = 1;
 
     /**
      * If you setup CNAME records to point to backblaze servers (for white-label service)
@@ -36,7 +36,7 @@ class Client
      * ['f0001.backblazeb2.com' => 'alias01.mydomain.com']
      * @var array
      */
-    public $domainAliases = [];
+    public array $domainAliases = [];
 
     /**
      * Lower limit for using large files upload support. More information:
@@ -45,13 +45,13 @@ class Client
      *
      * @var int
      */
-    public $largeFileLimit = 3000000000;
+    public int $largeFileLimit = 3000000000;
 
     /**
      * Seconds to remeber authorization
      * @var int
      */
-    public $authorizationCacheTime = 60;
+    public int $authorizationCacheTime = 60;
 
     /**
      * Client constructor. Accepts the account ID, application key and an optional array of options.
@@ -87,7 +87,7 @@ class Client
         $this->authorizeAccount(false);
     }
 
-    private function createCacheContainer()
+    private function createCacheContainer(): void
     {
         $container = new Container();
         $container['config'] = [
@@ -116,7 +116,7 @@ class Client
      * @return Bucket
      * @throws ValidationException
      */
-    public function createBucket(array $options)
+    public function createBucket(array $options): Bucket
     {
         if (!in_array($options['BucketType'], [Bucket::TYPE_PUBLIC, Bucket::TYPE_PRIVATE])) {
             throw new ValidationException(
@@ -142,7 +142,7 @@ class Client
      * @return Bucket
      * @throws ValidationException
      */
-    public function updateBucket(array $options)
+    public function updateBucket(array $options): Bucket
     {
         if (!in_array($options['BucketType'], [Bucket::TYPE_PUBLIC, Bucket::TYPE_PRIVATE])) {
             throw new ValidationException(
@@ -170,7 +170,7 @@ class Client
      *
      * @return Bucket[]
      */
-    public function listBuckets($refresh = false)
+    public function listBuckets(bool $refresh = false): array
     {
         $cacheKey = 'B2-SDK-Buckets';
         $bucketsObj = [];
@@ -201,7 +201,7 @@ class Client
      * @param array $options
      * @return bool
      */
-    public function deleteBucket(array $options)
+    public function deleteBucket(array $options): bool
     {
         if (!isset($options['BucketId']) && isset($options['BucketName'])) {
             $options['BucketId'] = $this->getBucketIdFromName($options['BucketName']);
@@ -223,10 +223,10 @@ class Client
      * @param array $options
      * @return File
      */
-    public function upload(array $options)
+    public function upload(array $options): File
     {
         // Clean the path if it starts with /.
-        if (substr($options['FileName'], 0, 1) === '/') {
+        if (str_starts_with($options['FileName'], '/')) {
             $options['FileName'] = ltrim($options['FileName'], '/');
         }
 
@@ -257,7 +257,7 @@ class Client
      * @param int $validDuration
      * @return string
      */
-    public function getDownloadAuthorization($bucket, $path, $validDuration = 60)
+    public function getDownloadAuthorization($bucket, string $path, int $validDuration = 60): string
     {
         if ($bucket instanceof Bucket) {
             $bucketId = $bucket->getId();
@@ -283,7 +283,7 @@ class Client
      * @param int $tokenTimeout
      * @return string
      */
-    public function getDownloadUrl($bucket, string $filePath, $appendToken = false, $tokenTimeout = 60)
+    public function getDownloadUrl($bucket, string $filePath, bool $appendToken = false, int $tokenTimeout = 60)
     {
         if (!$bucket instanceof Bucket) {
             $bucket = $this->getBucketFromId($bucket);
@@ -305,7 +305,7 @@ class Client
      * @param int $tokenTimeout
      * @return string
      */
-    public function getDownloadUrlForFile(File $file, $appendToken = false, $tokenTimeout = 60)
+    public function getDownloadUrlForFile(File $file, bool $appendToken = false, int $tokenTimeout = 60): string
     {
         return $this->getDownloadUrl($file->getBucketId(), $file->getFileName(), $appendToken, $tokenTimeout);
     }
@@ -320,7 +320,7 @@ class Client
     {
         $requestUrl = null;
         $requestOptions = [
-            'sink' => isset($options['SaveAs']) ? $options['SaveAs'] : fopen('php://temp', 'w'),
+            'sink' => $options['SaveAs'] ?? fopen('php://temp', 'w'),
         ];
 
         if (isset($options['FileId'])) {
@@ -344,7 +344,7 @@ class Client
         return isset($options['SaveAs']) ? true : $response;
     }
 
-    public function accelRedirectData(array $options)
+    public function accelRedirectData(array $options): array
     {
         $parsed = parse_url($this->downloadUrl);
 
@@ -358,9 +358,9 @@ class Client
      * Retrieve a collection of File objects representing the files stored inside a bucket.
      *
      * @param array $options
-     * @return array
+     * @return File[]
      */
-    public function listFiles(array $options)
+    public function listFilesFromArray(array $options): array
     {
         // if FileName is set, we only attempt to retrieve information about that single file.
         $fileName = !empty($options['FileName']) ? $options['FileName'] : null;
@@ -407,14 +407,79 @@ class Client
     }
 
     /**
+     * @param Bucket $bucket
+     * @param string $startFileName
+     * @param string $prefix
+     * @param string $delimiter
+     * @param int $maxFileCount
+     * @return File[]
+     */
+    public function listFiles(
+        Bucket $bucket,
+        string $startFileName = '',
+        string $delimiter = '',
+        int $maxFileCount = 1
+    ): array {
+        $files = [];
+
+        $nextFileName = '';
+
+        // B2 returns, at most, 1000 files per "page". Loop through the pages and compile an array of File objects.
+        while (true) {
+            $params = [
+                'bucketId' => $bucket->getId(),
+                'startFileName' => $nextFileName,
+                'maxFileCount' => $maxFileCount,
+                'prefix' => $startFileName,
+            ];
+            if (!empty($delimiter)) {
+                $params['delimiter'] = $delimiter;
+            }
+            $response = $this->request('POST', '/b2_list_file_names', [
+                'json' => $params,
+            ]);
+
+            foreach ($response['files'] as $file) {
+                if (substr($file['fileName'], -1, 1) === '/') {
+                    // Omitir directorios
+                    continue;
+                }
+                $files[] = new File($file);
+            }
+
+            if ($response['nextFileName'] === null) {
+                // We've got all the files - break out of loop.
+                break;
+            }
+
+            $nextFileName = $response['nextFileName'];
+        }
+
+        return $files;
+    }
+
+    /**
      * Test whether a file exists in B2 for the given bucket.
      *
      * @param array $options
      * @return boolean
      */
-    public function fileExists(array $options)
+    public function fileExistsFromArray(array $options): bool
     {
-        $files = $this->listFiles($options);
+        $files = $this->listFilesFromArray($options);
+
+        return !empty($files);
+    }
+
+    /**
+     * Test whether a file exists in B2 for the given bucket.
+     *
+     * @param array $options
+     * @return bool
+     */
+    public function fileExists(Bucket $bucket, string $fileName): bool
+    {
+        $files = $this->listFiles($bucket, $fileName);
 
         return !empty($files);
     }
@@ -423,22 +488,43 @@ class Client
      * Returns a single File object representing a file stored on B2.
      *
      * @param array $options
-     * @throws NotFoundException If no file id was provided and BucketName + FileName does not resolve to a file, a NotFoundException is thrown.
      * @return File
+     * @throws NotFoundException If no file id was provided and BucketName + FileName does not resolve to a file, a NotFoundException is thrown.
      */
-    public function getFile(array $options)
+    public function getFileFromArray(array $options): File
     {
-        if (!isset($options['FileId']) && isset($options['BucketName']) && isset($options['FileName'])) {
-            $options['FileId'] = $this->getFileIdFromBucketAndFileName($options['BucketName'], $options['FileName']);
-
-            if (!$options['FileId']) {
-                throw new NotFoundException();
-            }
+        if (isset($options['FileId'])) {
+            return $this->getFileFromFileId($options['FileId']);
         }
 
+        $bucket = new Bucket([
+            'BucketId' => @$options['BucketId'],
+            'BucketName' => @$options['BucketName'],
+        ]);
+
+        return $this->getFile($bucket, $options['FileName']);
+    }
+
+    /**
+     * This is an alias of getFileFromFileName function
+     * @param Bucket $bucket
+     * @param string $fileName
+     * @return ?File
+     */
+    public function getFile(Bucket $bucket, string $fileName): ?File
+    {
+        return $this->getFileFromFileName($bucket, $fileName);
+    }
+
+    /**
+     * @param string $fileId
+     * @return File
+     */
+    public function getFileFromFileId(string $fileId): File
+    {
         $response = $this->request('POST', '/b2_get_file_info', [
             'json' => [
-                'fileId' => $options['FileId'],
+                'fileId' => $fileId,
             ],
         ]);
 
@@ -451,16 +537,16 @@ class Client
      * @param array $options
      * @return bool
      */
-    public function deleteFile(array $options)
+    public function deleteFileFromArray(array $options): bool
     {
         if (!isset($options['FileName'])) {
-            $file = $this->getFile($options);
+            $file = $this->getFileFromArray($options);
 
             $options['FileName'] = $file->getFileName();
         }
 
         if (!isset($options['FileId']) && isset($options['BucketName']) && isset($options['FileName'])) {
-            $file = $this->getFile($options);
+            $file = $this->getFileFromArray($options);
 
             $options['FileId'] = $file->getFileId();
         }
@@ -476,12 +562,30 @@ class Client
     }
 
     /**
+     * Deletes the file identified by ID from Backblaze B2.
+     *
+     * @param array $options
+     * @return bool
+     */
+    public function deleteFile(File $file): bool
+    {
+        $this->request('POST', '/b2_delete_file_version', [
+            'json' => [
+                'fileName' => $file->getFileName(),
+                'fileId' => $file->getFileId(),
+            ],
+        ]);
+
+        return true;
+    }
+
+    /**
      * Maps the provided bucket name to the appropriate bucket ID.
      *
-     * @param $name
+     * @param string $name
      * @return string|null
      */
-    public function getBucketIdFromName($name)
+    public function getBucketIdFromName(string $name): ?string
     {
         $bucket = $this->getBucketFromName($name);
 
@@ -495,10 +599,10 @@ class Client
     /**
      * Maps the provided bucket ID to the appropriate bucket name.
      *
-     * @param $id
+     * @param string $id
      * @return string|null
      */
-    public function getBucketNameFromId($id)
+    public function getBucketNameFromId(string $id): ?string
     {
         $bucket = $this->getBucketFromId($id);
 
@@ -510,15 +614,15 @@ class Client
     }
 
     /**
-     * @param $bucketId
-     * @return Bucket|null
+     * @param string $bucketId
+     * @return ?Bucket
      */
-    public function getBucketFromId($id)
+    public function getBucketFromId(string $bucketId): ?Bucket
     {
         $buckets = $this->listBuckets();
 
         foreach ($buckets as $bucket) {
-            if ($bucket->getId() === $id) {
+            if ($bucket->getId() === $bucketId) {
                 return $bucket;
             }
         }
@@ -527,10 +631,10 @@ class Client
     }
 
     /**
-     * @param $name
-     * @return Bucket|null
+     * @param string $name
+     * @return ?Bucket
      */
-    public function getBucketFromName($name)
+    public function getBucketFromName(string $name): ?Bucket
     {
 
         $buckets = $this->listBuckets();
@@ -544,9 +648,27 @@ class Client
         return null;
     }
 
-    protected function getFileIdFromBucketAndFileName($bucketName, $fileName)
+    protected function getFileFromFileName(Bucket $bucket, string $fileName): ?File
     {
-        $files = $this->listFiles([
+        if (empty($bucket->getId())) {
+            throw new \Exception('BucketId has not been set');
+        }
+
+        /** @var File[] $files */
+        $files = $this->listFiles($bucket, $fileName);
+
+        foreach ($files as $file) {
+            if ($file->getFileName() === $fileName) {
+                return $file;
+            }
+        }
+
+        return null;
+    }
+
+    protected function getFileIdFromBucketAndFileName(string $bucketName, string $fileName): ?string
+    {
+        $files = $this->listFilesFromArray([
             'BucketName' => $bucketName,
             'FileName' => $fileName,
         ]);
@@ -564,12 +686,12 @@ class Client
      * Calculate hash and size of file/stream. If $offset and $partSize is given return
      * hash and size of this chunk
      *
-     * @param $content
+     * @param $data
      * @param int $offset
      * @param null $partSize
      * @return array
      */
-    protected function getFileHashAndSize($data, $offset = 0, $partSize = null)
+    protected function getFileHashAndSize($data, int $offset = 0, $partSize = null): array
     {
         if (!$partSize) {
             if (is_resource($data)) {
@@ -599,11 +721,11 @@ class Client
      * Return selected part of file
      *
      * @param $data
-     * @param $offset
-     * @param $partSize
+     * @param int $offset
+     * @param int $partSize
      * @return bool|string
      */
-    protected function getPartOfFile($data, $offset, $partSize)
+    protected function getPartOfFile($data, int $offset, int $partSize)
     {
         // Get size and hash of one data chunk
         if (is_resource($data)) {
@@ -624,7 +746,7 @@ class Client
      * @param array $options
      * @return File
      */
-    protected function uploadStandardFile($options = array())
+    protected function uploadStandardFile(array $options = []): File
     {
         // Retrieve the URL that we should be uploading to.
         $response = $this->request('POST', '/b2_get_upload_url', [
@@ -657,7 +779,7 @@ class Client
      * @param array $options
      * @return File
      */
-    protected function uploadLargeFile($options)
+    protected function uploadLargeFile(array $options): File
     {
         // Prepare for uploading the parts of a large file.
         $response = $this->request('POST', '/b2_start_large_file', [
@@ -730,7 +852,7 @@ class Client
      * Authorize the B2 account in order to get an auth token and API/download URLs.
      * @param bool $forceRefresh
      */
-    public function authorizeAccount(bool $forceRefresh = false)
+    public function authorizeAccount(bool $forceRefresh = false): void
     {
         $keyId = $this->authorizationValues['keyId'];
         $applicationKey = $this->authorizationValues['applicationKey'];
@@ -761,10 +883,9 @@ class Client
      * @param string $uri
      * @param array $options
      * @param bool $asJson
-     * @param bool $wantsGetContents
      * @return mixed|string
      */
-    protected function request($method, $uri = null, array $options = [], $asJson = true)
+    protected function request(string $method, string $uri = '', array $options = [], bool $asJson = true)
     {
         $headers = [];
 
@@ -779,7 +900,7 @@ class Client
 
         $fullUri = $uri;
 
-        if (substr($uri, 0, 8) !== 'https://') {
+        if (!str_starts_with($uri, 'https://')) {
             $fullUri = $this->apiUrl . $uri;
         }
 
