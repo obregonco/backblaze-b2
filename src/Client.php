@@ -890,7 +890,7 @@ class Client
         $headers = [];
 
         // Add Authorization token if defined
-        if ($this->authToken) {
+        if (isset($this->authToken)) {
             $headers['Authorization'] = $this->authToken;
         }
 
