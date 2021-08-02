@@ -30,6 +30,8 @@ class Client
 
     public int $version = 1;
 
+    public string $cacheParentDir = __DIR__;
+
     /**
      * If you setup CNAME records to point to backblaze servers (for white-label service)
      * assign this property with the equivalent URLs
@@ -79,6 +81,10 @@ class Client
             $this->client = new HttpClient(['exceptions' => false]);
         }
 
+        if (isset($options['cacheParentDir'])) {
+            $this->cacheParentDir = $options['cacheParentDir'];
+        }
+
         // initialize cache
         $this->createCacheContainer();
 
@@ -89,12 +95,16 @@ class Client
 
     private function createCacheContainer(): void
     {
+        if (!file_exists($this->cacheParentDir . '/Cache')) {
+            mkdir($this->cacheParentDir . '/Cache', 0700, true);
+        }
+
         $container = new Container();
         $container['config'] = [
             'cache.default' => 'file',
             'cache.stores.file' => [
                 'driver' => 'file',
-                'path' => __DIR__ . '/Cache',
+                'path' => $this->cacheParentDir . '/Cache',
             ],
         ];
         $container['files'] = new Filesystem;
