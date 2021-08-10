@@ -31,9 +31,9 @@ class File implements \JsonSerializable
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getAccountId()
+    public function getAccountId(): string
     {
         return $this->accountId;
     }

@@ -864,9 +864,6 @@ class Client
      */
     public function authorizeAccount(bool $forceRefresh = false): void
     {
-        $keyId = $this->authorizationValues['keyId'];
-        $applicationKey = $this->authorizationValues['applicationKey'];
-
         $baseApiUrl = 'https://api.backblazeb2.com';
         $versionPath = '/b2api/v' . $this->version;
 
@@ -875,9 +872,12 @@ class Client
         }
 
         $response = $this->cache->remember('B2-SDK-Authorization', $this->authorizationCacheTime,
-            function () use ($keyId, $applicationKey, $baseApiUrl, $versionPath) {
+            function () use ($baseApiUrl, $versionPath) {
                 return $this->request('GET', $baseApiUrl . $versionPath . '/b2_authorize_account', [
-                    'auth' => [$keyId, $applicationKey],
+                    'auth' => [
+                        $this->authorizationValues['keyId'],
+                        $this->authorizationValues['applicationKey'],
+                    ],
                 ]);
             });
 

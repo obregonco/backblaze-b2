@@ -71,7 +71,7 @@ $fileContent = $client->download([
 ]);
 
 // Delete a file from a bucket. Returns true or false.
-$fileDelete = $client->deleteFile([
+$fileDelete = $client->deleteFileFromArray([
     'FileId' => $file->getId()
     
     // Can also identify the file via bucket and path:
@@ -80,7 +80,7 @@ $fileDelete = $client->deleteFile([
 ]);
 
 // Retrieve an array of file objects from a bucket.
-$fileList = $client->listFiles([
+$fileList = $client->listFilesFromArray([
     'BucketId' => '4d2dbbe08e1e983c5e6f0d12'
 ]);
 ```
