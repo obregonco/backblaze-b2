@@ -590,6 +590,31 @@ class Client
 
         return true;
     }
+	
+    /**
+     * Copies the file identified by ID from one location in B2 to another location.
+     *
+     * @param array{DestinationFileName:string,SourceFileId:string,FileName:string,BucketName:string} $options
+     * @return bool
+     */
+    public function copyFile(array $options)
+    {
+		$SourceFileId = $options['SourceFileId'] ?? '';
+        if ($SourceFileId === '' && isset($options['BucketName']) && isset($options['FileName'])) {
+            $file = $this->getFile($options);
+            $SourceFileId = $file->getFileId();
+        }
+
+        $this->request('POST', '/b2_copy_file', [
+            'json' => [
+                'fileName' => $options['DestinationFileName'],
+                'sourceFileId' => $SourceFileId,
+				'metadataDirective' => 'COPY'
+            ],
+        ]);
+
+        return true;
+    }
 
     /**
      * Maps the provided bucket name to the appropriate bucket ID.
