@@ -601,7 +601,7 @@ class Client
     {
 		$SourceFileId = $options['SourceFileId'] ?? '';
         if ($SourceFileId === '' && isset($options['BucketName']) && isset($options['FileName'])) {
-            $file = $this->getFile($options);
+            $file = $this->getFile($options['BucketName'], $options['FileName']);
             $SourceFileId = $file->getFileId();
         }
 
