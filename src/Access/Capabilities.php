@@ -33,13 +33,13 @@ class Capabilities
     /** @var array */
     protected $capabilities;
 
-	/**
-	 * @param array $capabilities
-	 */
-	public function __construct(array $capabilities)
-	{
-		$this->capabilities = $capabilities;
-	}
+    /**
+     * @param array $capabilities
+     */
+    public function __construct(array $capabilities)
+    {
+        $this->capabilities = $capabilities;
+    }
 
     /**
      * @return array
