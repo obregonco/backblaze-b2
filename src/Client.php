@@ -9,6 +9,8 @@ use obregonco\B2\Http\Client as HttpClient;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Container\Container;
 use Illuminate\Filesystem\Filesystem;
+use obregonco\B2\Access\Capabilities;
+use obregonco\B2\Access\Key;
 
 class Client
 {
@@ -877,12 +879,68 @@ class Client
     }
 
     /**
-     * @param Key $key
-     * @throws \Exception
+     * Creates an access key under $accountId with the given $capabilities.
+     *
+     * @param string $name
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
+     *
+     * @return Key
      */
-    public function createKey($key)
+    public function createKey(string $accountId, string $name, Capabilities $capabilities)
     {
-        throw new \Exception(__FUNCTION__ . ' has not been implemented yet');
+        if (!preg_match('/^[a-zA-Z0-9-]{1,100}$/', $name)) {
+            throw new \InvalidArgumentException(
+                'The key name is invalid. It can be up to 100 characters long and containing letters, numbers and "-".'
+            );
+        }
+
+        $response = $this->request('POST', '/b2_create_key', [
+            'json' => [
+                'accountId' => $accountId,
+                'keyName' => $name,
+                'capabilities' => $capabilities->getCapabilities(),
+            ],
+            true
+        ]);
+
+        if (empty($response)) {
+            throw new \RuntimeException('The key creation failed. Got empty response.');
+        }
+
+        if (!isset($response['accountId'])) {
+            throw new \RuntimeException('The accountId field is not set in the response.');
+        }
+
+        if (!isset($response['applicationKey'])) {
+            throw new \RuntimeException('The applicationKey field is not set in the response.');
+        }
+
+        if (!isset($response['applicationKeyId'])) {
+            throw new \RuntimeException('The applicationKeyId field is not set in the response.');
+        }
+
+        if (!isset($response['capabilities'])) {
+            throw new \RuntimeException('The capabilities field is not set in the response.');
+        }
+
+        $decodedCapabilities = json_decode($response['capabilities'], true);
+
+        if (null === $decodedCapabilities) {
+            throw new \RuntimeException('The capabilities array returned is invalid.');
+        }
+
+        $capabilities = new Capabilities([]);
+        foreach ($decodedCapabilities as $capability) {
+            $capabilities->addCapability($capability);
+        }
+
+        return new Key(
+            $response['accountId'],
+            $response['applicationKeyId'],
+            $response['applicationKey'],
+            $capabilities
+        );
     }
 
     /**
