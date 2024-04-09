@@ -23,13 +23,14 @@ class Key
      * @param string $keyId
      * @param string $applicationKey
      */
-    public function __construct($accountId, $keyId, $applicationKey, ?Capabilities $capabilities = null)
+    public function __construct($accountId, $keyId, $applicationKey, Capabilities $capabilities = null)
     {
         $this->accountId = $accountId;
         $this->keyId = $keyId;
         $this->applicationKey = $applicationKey;
         $this->capabilities = $capabilities;
     }
+
     /**
      * @return string
      */
@@ -48,24 +49,27 @@ class Key
 
     /**
      * @param string $keyId
+     *
      * @return self
      */
     public function setKeyId($keyId)
     {
         $this->keyId = $keyId;
+
         return $this;
     }
 
     /**
      * @param string $applicationKey
+     *
      * @return self
      */
     public function setApplicationKey($applicationKey)
     {
         $this->applicationKey = $applicationKey;
+
         return $this;
     }
-
 
     public function getAccountId(): string
     {
@@ -74,11 +78,11 @@ class Key
 
     /**
      * @param string $accountId
-     * @return self
      */
     public function setAccountId($accountId): self
     {
         $this->accountId = $accountId;
+
         return $this;
     }
 
@@ -92,11 +96,13 @@ class Key
 
     /**
      * @param Capabilities $capabilities
+     *
      * @return self
      */
     public function setCapabilities($capabilities)
     {
         $this->capabilities = $capabilities;
+
         return $this;
     }
 }

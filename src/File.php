@@ -21,7 +21,6 @@ class File implements \JsonSerializable
 
     /**
      * File constructor.
-     * @param array $values
      */
     public function __construct(array $values)
     {
@@ -30,9 +29,6 @@ class File implements \JsonSerializable
         }
     }
 
-    /**
-     * @return string
-     */
     public function getAccountId(): string
     {
         return $this->accountId;

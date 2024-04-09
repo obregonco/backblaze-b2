@@ -2,15 +2,15 @@
 
 namespace obregonco\B2;
 
-use obregonco\B2\Exceptions\CacheException;
-use obregonco\B2\Exceptions\NotFoundException;
-use obregonco\B2\Exceptions\ValidationException;
-use obregonco\B2\Http\Client as HttpClient;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Container\Container;
 use Illuminate\Filesystem\Filesystem;
 use obregonco\B2\Access\Capabilities;
 use obregonco\B2\Access\Key;
+use obregonco\B2\Exceptions\CacheException;
+use obregonco\B2\Exceptions\NotFoundException;
+use obregonco\B2\Exceptions\ValidationException;
+use obregonco\B2\Http\Client as HttpClient;
 
 class Client
 {
@@ -37,8 +37,7 @@ class Client
     /**
      * If you setup CNAME records to point to backblaze servers (for white-label service)
      * assign this property with the equivalent URLs
-     * ['f0001.backblazeb2.com' => 'alias01.mydomain.com']
-     * @var array
+     * ['f0001.backblazeb2.com' => 'alias01.mydomain.com'].
      */
     public array $domainAliases = [];
 
@@ -46,22 +45,17 @@ class Client
      * Lower limit for using large files upload support. More information:
      * https://www.backblaze.com/b2/docs/large_files.html. Default: 3 GB
      * Files larger than this value will be uploaded in multiple parts.
-     *
-     * @var int
      */
     public int $largeFileLimit = 3000000000;
 
     /**
-     * Seconds to remeber authorization
-     * @var int
+     * Seconds to remeber authorization.
      */
     public int $authorizationCacheTime = 60;
 
     /**
      * Client constructor. Accepts the account ID, application key and an optional array of options.
-     * @param string $accountId
-     * @param array $authorizationValues
-     * @param array $options
+     *
      * @throws CacheException
      */
     public function __construct(string $accountId, array $authorizationValues, array $options = [])
@@ -75,7 +69,6 @@ class Client
         if (empty($authorizationValues['keyId']) or empty($authorizationValues['applicationKey'])) {
             throw new \Exception('Please provide "keyId" and "applicationKey"');
         }
-
 
         if (isset($options['client'])) {
             $this->client = $options['client'];
@@ -97,8 +90,8 @@ class Client
 
     private function createCacheContainer(): void
     {
-        if (!file_exists($this->cacheParentDir . '/Cache')) {
-            mkdir($this->cacheParentDir . '/Cache', 0700, true);
+        if (!file_exists($this->cacheParentDir.'/Cache')) {
+            mkdir($this->cacheParentDir.'/Cache', 0700, true);
         }
 
         $container = new Container();
@@ -106,34 +99,28 @@ class Client
             'cache.default' => 'file',
             'cache.stores.file' => [
                 'driver' => 'file',
-                'path' => $this->cacheParentDir . '/Cache',
+                'path' => $this->cacheParentDir.'/Cache',
             ],
         ];
-        $container['files'] = new Filesystem;
+        $container['files'] = new Filesystem();
 
         try {
             $cacheManager = new CacheManager($container);
             $this->cache = $cacheManager->store();
         } catch (\Exception $e) {
-            throw new CacheException(
-                $e->getMessage()
-            );
+            throw new CacheException($e->getMessage());
         }
     }
 
     /**
      * Create a bucket with the given name and type.
      *
-     * @param array $options
-     * @return Bucket
      * @throws ValidationException
      */
     public function createBucket(array $options): Bucket
     {
         if (!in_array($options['BucketType'], [Bucket::TYPE_PUBLIC, Bucket::TYPE_PRIVATE])) {
-            throw new ValidationException(
-                sprintf('Bucket type must be %s or %s', Bucket::TYPE_PRIVATE, Bucket::TYPE_PUBLIC)
-            );
+            throw new ValidationException(sprintf('Bucket type must be %s or %s', Bucket::TYPE_PRIVATE, Bucket::TYPE_PUBLIC));
         }
 
         $response = $this->request('POST', '/b2_create_bucket', [
@@ -150,16 +137,12 @@ class Client
     /**
      * Updates the type attribute of a bucket by the given ID.
      *
-     * @param array $options
-     * @return Bucket
      * @throws ValidationException
      */
     public function updateBucket(array $options): Bucket
     {
         if (!in_array($options['BucketType'], [Bucket::TYPE_PUBLIC, Bucket::TYPE_PRIVATE])) {
-            throw new ValidationException(
-                sprintf('Bucket type must be %s or %s', Bucket::TYPE_PRIVATE, Bucket::TYPE_PUBLIC)
-            );
+            throw new ValidationException(sprintf('Bucket type must be %s or %s', Bucket::TYPE_PRIVATE, Bucket::TYPE_PUBLIC));
         }
 
         if (!isset($options['BucketId']) && isset($options['BucketName'])) {
@@ -189,7 +172,7 @@ class Client
         if (!$this->cache->has($cacheKey)) {
             $refresh = true;
         }
-        if ($refresh === true) {
+        if (true === $refresh) {
             $buckets = $this->request('POST', '/b2_list_buckets', [
                 'json' => [
                     'accountId' => $this->accountId,
@@ -209,9 +192,6 @@ class Client
 
     /**
      * Deletes the bucket identified by its ID.
-     *
-     * @param array $options
-     * @return bool
      */
     public function deleteBucket(array $options): bool
     {
@@ -231,9 +211,6 @@ class Client
 
     /**
      * Uploads a file to a bucket and returns a File object.
-     *
-     * @param array $options
-     * @return File
      */
     public function upload(array $options): File
     {
@@ -263,12 +240,6 @@ class Client
         }
     }
 
-    /**
-     * @param $bucket
-     * @param $path
-     * @param int $validDuration
-     * @return string
-     */
     public function getDownloadAuthorization($bucket, string $path, int $validDuration = 60): string
     {
         if ($bucket instanceof Bucket) {
@@ -290,9 +261,7 @@ class Client
 
     /**
      * @param Bucket|string $bucket
-     * @param string $filePath
-     * @param bool $appendToken
-     * @param int $tokenTimeout
+     *
      * @return string
      */
     public function getDownloadUrl($bucket, string $filePath, bool $appendToken = false, int $tokenTimeout = 60)
@@ -301,22 +270,16 @@ class Client
             $bucket = $this->getBucketFromId($bucket);
         }
 
-        $path = $this->downloadUrl . '/file/' . $bucket->getName() . '/' . $filePath;
+        $path = $this->downloadUrl.'/file/'.$bucket->getName().'/'.$filePath;
 
         if ($appendToken) {
             $path .= '?Authorization='
-                . $this->getDownloadAuthorization($bucket, dirname($filePath) . '/', $tokenTimeout);
+                .$this->getDownloadAuthorization($bucket, dirname($filePath).'/', $tokenTimeout);
         }
 
         return strtr($path, $this->domainAliases);
     }
 
-    /**
-     * @param File $file
-     * @param bool $appendToken
-     * @param int $tokenTimeout
-     * @return string
-     */
     public function getDownloadUrlForFile(File $file, bool $appendToken = false, int $tokenTimeout = 60): string
     {
         return $this->getDownloadUrl($file->getBucketId(), $file->getFileName(), $appendToken, $tokenTimeout);
@@ -325,7 +288,6 @@ class Client
     /**
      * Download a file from a B2 bucket.
      *
-     * @param array $options
      * @return bool|mixed|string
      */
     public function download(array $options)
@@ -337,7 +299,7 @@ class Client
 
         if (isset($options['FileId'])) {
             $requestOptions['query'] = ['fileId' => $options['FileId']];
-            $requestUrl = $this->downloadUrl . '/b2api/v1/b2_download_file_by_id';
+            $requestUrl = $this->downloadUrl.'/b2api/v1/b2_download_file_by_id';
         } else {
             if (!isset($options['BucketName']) && isset($options['BucketId'])) {
                 $options['BucketName'] = $this->getBucketNameFromId($options['BucketId']);
@@ -362,21 +324,20 @@ class Client
 
         return [
             'host' => $parsed['host'],
-            'query' => sprintf("fileId=%s", $options['FileId']),
+            'query' => sprintf('fileId=%s', $options['FileId']),
         ];
     }
 
     /**
      * Retrieve a collection of File objects representing the files stored inside a bucket.
      *
-     * @param array $options
      * @return File[]
      */
     public function listFilesFromArray(array $options): array
     {
         // if FileName is set, we only attempt to retrieve information about that single file.
         $fileName = !empty($options['FileName']) ? $options['FileName'] : null;
-		$prefix = !empty($options['Prefix']) ? $options['Prefix'] : null;
+        $prefix = !empty($options['Prefix']) ? $options['Prefix'] : null;
 
         $nextFileName = null;
         $maxFileCount = 1000;
@@ -396,7 +357,7 @@ class Client
             $response = $this->request('POST', '/b2_list_file_names', [
                 'json' => [
                     'bucketId' => $options['BucketId'],
-					'prefix' => $prefix,
+                    'prefix' => $prefix,
                     'startFileName' => $nextFileName,
                     'maxFileCount' => $maxFileCount,
                 ],
@@ -409,7 +370,7 @@ class Client
                 }
             }
 
-            if ($fileName || $response['nextFileName'] === null) {
+            if ($fileName || null === $response['nextFileName']) {
                 // We've got all the files - break out of loop.
                 break;
             }
@@ -421,11 +382,6 @@ class Client
     }
 
     /**
-     * @param Bucket $bucket
-     * @param string $startFileName
-     * @param string $prefix
-     * @param string $delimiter
-     * @param int $maxFileCount
      * @return File[]
      */
     public function listFiles(
@@ -454,14 +410,14 @@ class Client
             ]);
 
             foreach ($response['files'] as $file) {
-                if (substr($file['fileName'], -1, 1) === '/') {
+                if ('/' === substr($file['fileName'], -1, 1)) {
                     // Omitir directorios
                     continue;
                 }
                 $files[] = new File($file);
             }
 
-            if ($response['nextFileName'] === null) {
+            if (null === $response['nextFileName']) {
                 // We've got all the files - break out of loop.
                 break;
             }
@@ -474,9 +430,6 @@ class Client
 
     /**
      * Test whether a file exists in B2 for the given bucket.
-     *
-     * @param array $options
-     * @return boolean
      */
     public function fileExistsFromArray(array $options): bool
     {
@@ -487,9 +440,6 @@ class Client
 
     /**
      * Test whether a file exists in B2 for the given bucket.
-     *
-     * @param array $options
-     * @return bool
      */
     public function fileExists(Bucket $bucket, string $fileName): bool
     {
@@ -501,9 +451,7 @@ class Client
     /**
      * Returns a single File object representing a file stored on B2.
      *
-     * @param array $options
-     * @return File
-     * @throws NotFoundException If no file id was provided and BucketName + FileName does not resolve to a file, a NotFoundException is thrown.
+     * @throws NotFoundException if no file id was provided and BucketName + FileName does not resolve to a file, a NotFoundException is thrown
      */
     public function getFileFromArray(array $options): File
     {
@@ -520,9 +468,8 @@ class Client
     }
 
     /**
-     * This is an alias of getFileFromFileName function
-     * @param Bucket $bucket
-     * @param string $fileName
+     * This is an alias of getFileFromFileName function.
+     *
      * @return ?File
      */
     public function getFile(Bucket $bucket, string $fileName): ?File
@@ -530,10 +477,6 @@ class Client
         return $this->getFileFromFileName($bucket, $fileName);
     }
 
-    /**
-     * @param string $fileId
-     * @return File
-     */
     public function getFileFromFileId(string $fileId): File
     {
         $response = $this->request('POST', '/b2_get_file_info', [
@@ -547,9 +490,6 @@ class Client
 
     /**
      * Deletes the file identified by ID from Backblaze B2.
-     *
-     * @param array $options
-     * @return bool
      */
     public function deleteFileFromArray(array $options): bool
     {
@@ -577,9 +517,6 @@ class Client
 
     /**
      * Deletes the file identified by ID from Backblaze B2.
-     *
-     * @param array $options
-     * @return bool
      */
     public function deleteFile(File $file): bool
     {
@@ -592,17 +529,18 @@ class Client
 
         return true;
     }
-	
+
     /**
      * Copies the file identified by ID from one location in B2 to another location.
      *
      * @param array{DestinationFileName:string,SourceFileId:string,FileName:string,BucketName:string} $options
+     *
      * @return bool
      */
     public function copyFile(array $options)
     {
-		$SourceFileId = $options['SourceFileId'] ?? '';
-        if ($SourceFileId === '' && isset($options['BucketName']) && isset($options['FileName'])) {
+        $SourceFileId = $options['SourceFileId'] ?? '';
+        if ('' === $SourceFileId && isset($options['BucketName']) && isset($options['FileName'])) {
             $file = $this->getFile($options['BucketName'], $options['FileName']);
             $SourceFileId = $file->getFileId();
         }
@@ -611,7 +549,7 @@ class Client
             'json' => [
                 'fileName' => $options['DestinationFileName'],
                 'sourceFileId' => $SourceFileId,
-				'metadataDirective' => 'COPY'
+                'metadataDirective' => 'COPY',
             ],
         ]);
 
@@ -620,9 +558,6 @@ class Client
 
     /**
      * Maps the provided bucket name to the appropriate bucket ID.
-     *
-     * @param string $name
-     * @return string|null
      */
     public function getBucketIdFromName(string $name): ?string
     {
@@ -637,9 +572,6 @@ class Client
 
     /**
      * Maps the provided bucket ID to the appropriate bucket name.
-     *
-     * @param string $id
-     * @return string|null
      */
     public function getBucketNameFromId(string $id): ?string
     {
@@ -653,7 +585,6 @@ class Client
     }
 
     /**
-     * @param string $bucketId
      * @return ?Bucket
      */
     public function getBucketFromId(string $bucketId): ?Bucket
@@ -670,12 +601,10 @@ class Client
     }
 
     /**
-     * @param string $name
      * @return ?Bucket
      */
     public function getBucketFromName(string $name): ?Bucket
     {
-
         $buckets = $this->listBuckets();
 
         foreach ($buckets as $bucket) {
@@ -723,12 +652,9 @@ class Client
 
     /**
      * Calculate hash and size of file/stream. If $offset and $partSize is given return
-     * hash and size of this chunk
+     * hash and size of this chunk.
      *
-     * @param $data
-     * @param int $offset
      * @param null $partSize
-     * @return array
      */
     protected function getFileHashAndSize($data, int $offset = 0, $partSize = null): array
     {
@@ -753,15 +679,12 @@ class Client
             $size = mb_strlen($dataPart, '8bit');
         }
 
-        return array($hash, $size);
+        return [$hash, $size];
     }
 
     /**
-     * Return selected part of file
+     * Return selected part of file.
      *
-     * @param $data
-     * @param int $offset
-     * @param int $partSize
      * @return bool|string
      */
     protected function getPartOfFile($data, int $offset, int $partSize)
@@ -776,14 +699,12 @@ class Client
         } else {
             $dataPart = substr($data, $offset, $partSize);
         }
+
         return $dataPart;
     }
 
     /**
-     * Upload single file (smaller than 3 GB)
-     *
-     * @param array $options
-     * @return File
+     * Upload single file (smaller than 3 GB).
      */
     protected function uploadStandardFile(array $options = []): File
     {
@@ -813,10 +734,7 @@ class Client
     }
 
     /**
-     * Upload large file. Large files will be uploaded in chunks of recommendedPartSize bytes (usually 100MB each)
-     *
-     * @param array $options
-     * @return File
+     * Upload large file. Large files will be uploaded in chunks of recommendedPartSize bytes (usually 100MB each).
      */
     protected function uploadLargeFile(array $options): File
     {
@@ -826,7 +744,7 @@ class Client
                 'bucketId' => $options['BucketId'],
                 'fileName' => $options['FileName'],
                 'contentType' => $options['FileContentType'],
-                /**
+                /*
                  * 'fileInfo' => [
                  * 'src_last_modified_millis' => $options['FileLastModified'],
                  * 'large_file_sha1' => $options['hash']
@@ -839,7 +757,7 @@ class Client
         $partsCount = ceil($options['size'] / $this->recommendedPartSize);
 
         $hashParts = [];
-        for ($i = 1; $i <= $partsCount; $i++) {
+        for ($i = 1; $i <= $partsCount; ++$i) {
             $bytesSent = ($i - 1) * $this->recommendedPartSize;
             $bytesLeft = $options['size'] - $bytesSent;
             $partSize = ($bytesLeft > $this->recommendedPartSize) ? $this->recommendedPartSize : $bytesLeft;
@@ -875,33 +793,37 @@ class Client
                 'partSha1Array' => $hashParts,
             ],
         ]);
+
         return new File($response);
     }
 
     /**
      * Creates an access key under $accountId with the given $capabilities.
      *
-     * @param string $name
+     * @return Key
+     *
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
-     *
-     * @return Key
      */
-    public function createKey(string $accountId, string $name, Capabilities $capabilities)
+    public function createKey(string $name, Capabilities $capabilities, string $bucketId = null)
     {
         if (!preg_match('/^[a-zA-Z0-9-]{1,100}$/', $name)) {
-            throw new \InvalidArgumentException(
-                'The key name is invalid. It can be up to 100 characters long and containing letters, numbers and "-".'
-            );
+            throw new \InvalidArgumentException('The key name is invalid. It can be up to 100 characters long and containing letters, numbers and "-".');
+        }
+
+        $json = [
+            'accountId' => $this->accountId,
+            'keyName' => $name,
+            'capabilities' => $capabilities->getCapabilities(),
+        ];
+
+        if (!empty($bucketId)) {
+            $json['bucketId'] = $bucketId;
         }
 
         $response = $this->request('POST', '/b2_create_key', [
-            'json' => [
-                'accountId' => $accountId,
-                'keyName' => $name,
-                'capabilities' => $capabilities->getCapabilities(),
-            ],
-            true
+            'json' => $json,
+            true,
         ]);
 
         if (empty($response)) {
@@ -924,14 +846,8 @@ class Client
             throw new \RuntimeException('The capabilities field is not set in the response.');
         }
 
-        $decodedCapabilities = json_decode($response['capabilities'], true);
-
-        if (null === $decodedCapabilities) {
-            throw new \RuntimeException('The capabilities array returned is invalid.');
-        }
-
         $capabilities = new Capabilities([]);
-        foreach ($decodedCapabilities as $capability) {
+        foreach ($response['capabilities'] as $capability) {
             $capabilities->addCapability($capability);
         }
 
@@ -945,39 +861,38 @@ class Client
 
     /**
      * Authorize the B2 account in order to get an auth token and API/download URLs.
-     * @param bool $forceRefresh
      */
     public function authorizeAccount(bool $forceRefresh = false): void
     {
         $baseApiUrl = 'https://api.backblazeb2.com';
-        $versionPath = '/b2api/v' . $this->version;
+        $versionPath = '/b2api/v'.$this->version;
 
-        if ($forceRefresh === true) {
+        if (true === $forceRefresh) {
             $this->cache->forget('B2-SDK-Authorization');
         }
 
-        $response = $this->cache->remember('B2-SDK-Authorization', $this->authorizationCacheTime,
+        $response = $this->cache->remember(
+            'B2-SDK-Authorization',
+            $this->authorizationCacheTime,
             function () use ($baseApiUrl, $versionPath) {
-                return $this->request('GET', $baseApiUrl . $versionPath . '/b2_authorize_account', [
+                return $this->request('GET', $baseApiUrl.$versionPath.'/b2_authorize_account', [
                     'auth' => [
                         $this->authorizationValues['keyId'],
                         $this->authorizationValues['applicationKey'],
                     ],
                 ]);
-            });
+            }
+        );
 
         $this->authToken = $response['authorizationToken'];
-        $this->apiUrl = $response['apiUrl'] . $versionPath;
+        $this->apiUrl = $response['apiUrl'].$versionPath;
         $this->downloadUrl = $response['downloadUrl'];
         $this->recommendedPartSize = $response['recommendedPartSize'];
     }
 
     /**
-     * Wrapper for $this->client->request
-     * @param string $method
-     * @param string $uri
-     * @param array $options
-     * @param bool $asJson
+     * Wrapper for $this->client->request.
+     *
      * @return mixed|string
      */
     protected function request(string $method, string $uri = '', array $options = [], bool $asJson = true)
@@ -996,7 +911,7 @@ class Client
         $fullUri = $uri;
 
         if (!str_starts_with($uri, 'https://')) {
-            $fullUri = $this->apiUrl . $uri;
+            $fullUri = $this->apiUrl.$uri;
         }
 
         $response = $this->client->request($method, $fullUri, $options);
