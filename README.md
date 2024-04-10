@@ -83,6 +83,17 @@ $fileDelete = $client->deleteFileFromArray([
 $fileList = $client->listFilesFromArray([
     'BucketId' => '4d2dbbe08e1e983c5e6f0d12'
 ]);
+
+// Create a new access key
+$capabilities = new Capabilities()
+$key = $client->createKey($accountId, $name, new Capabilities(
+    [Capabilities::DELETE_BUCKETS,
+    Capabilities::LIST_ALL_BUCKET_NAMES,
+    Capabilities::READ_BUCKETS]
+));
+
+$keyId = $key->getKeyId();
+$applicationKetId = $key->getApplicationKey();
 ```
 
 ## Installation

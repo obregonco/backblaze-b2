@@ -2,6 +2,7 @@
 
 namespace obregonco\B2;
 
+use GuzzleHttp\Psr7\Response;
 use obregonco\B2\Exceptions\B2Exception;
 use obregonco\B2\Exceptions\BadJsonException;
 use obregonco\B2\Exceptions\BadValueException;
@@ -9,16 +10,15 @@ use obregonco\B2\Exceptions\BucketAlreadyExistsException;
 use obregonco\B2\Exceptions\BucketNotEmptyException;
 use obregonco\B2\Exceptions\FileNotPresentException;
 use obregonco\B2\Exceptions\NotFoundException;
-use GuzzleHttp\Psr7\Response;
 
 class ErrorHandler
 {
     protected static $mappings = [
-        'bad_json'                       => BadJsonException::class,
-        'bad_value'                      => BadValueException::class,
-        'duplicate_bucket_name'          => BucketAlreadyExistsException::class,
-        'not_found'                      => NotFoundException::class,
-        'file_not_present'               => FileNotPresentException::class,
+        'bad_json' => BadJsonException::class,
+        'bad_value' => BadValueException::class,
+        'duplicate_bucket_name' => BucketAlreadyExistsException::class,
+        'not_found' => NotFoundException::class,
+        'file_not_present' => FileNotPresentException::class,
         'cannot_delete_non_empty_bucket' => BucketNotEmptyException::class,
     ];
 

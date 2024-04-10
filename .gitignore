@@ -1,0 +1,4 @@
+vendor/*
+.php_cs-fixer.cache
+.phpstan.cache/
+var/

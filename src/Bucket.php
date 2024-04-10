@@ -4,8 +4,8 @@ namespace obregonco\B2;
 
 class Bucket
 {
-    const TYPE_PUBLIC = 'allPublic';
-    const TYPE_PRIVATE = 'allPrivate';
+    public const TYPE_PUBLIC = 'allPublic';
+    public const TYPE_PRIVATE = 'allPrivate';
 
     protected $bucketId;
     protected $bucketName;
@@ -20,7 +20,6 @@ class Bucket
 
     /**
      * Bucket constructor.
-     * @param array $values
      */
     public function __construct(array $values)
     {

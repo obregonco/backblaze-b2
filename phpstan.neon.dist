@@ -1,0 +1,7 @@
+parameters:
+    tmpDir: .phpstan.cache/
+    level: 2
+    excludePaths:
+        - vendor/
+    paths:
+        - src/
