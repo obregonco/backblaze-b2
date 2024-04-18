@@ -18,9 +18,7 @@ class Client
     /** @var string */
     protected $accountId;
 
-    /**
-     * @var \Illuminate\Contracts\Cache\Repository
-     */
+    /** @var \Illuminate\Contracts\Cache\Repository */
     protected $cache;
 
     protected string $authToken;

@@ -9,6 +9,8 @@ use Psr\Http\Message\ResponseInterface;
 /**
  * Client wrapper around Guzzle.
  */
+// FIXME: Class obregonco\B2\Http\Client extends @final class GuzzleHttp\Client.
+// @phpstan-ignore-next-line
 class Client extends GuzzleClient
 {
     public $retryLimit = 10;
@@ -21,6 +23,9 @@ class Client extends GuzzleClient
      *
      * @return mixed|string
      */
+    // FIXME: PHPDoc tag @return with type mixed is not subtype of native type Psr\Http\Message\ResponseInterface.
+    // FIXME: Default value of the parameter #2 $uri (string) of method obregonco\B2\Http\Client::request() is incompatible with type null.
+    // @phpstan-ignore-next-line
     public function request(string $method, $uri = '', array $options = []): ResponseInterface
     {
         $response = parent::request($method, $uri, $options);
