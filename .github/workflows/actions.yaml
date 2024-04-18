@@ -45,4 +45,4 @@ jobs:
         run: composer install --prefer-dist --no-scripts --no-progress --no-suggest
 
       - name: Run PHP CS Fixer
-        run: vendor/bin/php-cs-fixer fix --dry-run --diff
+        run: vendor/bin/php-cs-fixer fix --dry-run --diff src
