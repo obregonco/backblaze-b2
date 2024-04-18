@@ -3,7 +3,10 @@ name: PHP Pipeline
 on:
   push:
     branches:
-      - main
+      - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
   lint:
