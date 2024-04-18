@@ -2,6 +2,7 @@
 
 namespace obregonco\B2;
 
+use GuzzleHttp\Exception\RequestException;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Container\Container;
 use Illuminate\Filesystem\Filesystem;
@@ -860,6 +861,28 @@ class Client
     }
 
     /**
+     * Deletes the key having the provided $id from Backblaze.
+     *
+     * @throws RequestException
+     * @throws \InvalidArgumentException
+     */
+    public function deleteKey(string $id): void
+    {
+        if (empty($id)) {
+            throw new \InvalidArgumentException('The key ID is empty.');
+        }
+
+        $json = [
+            'applicationKeyId' => $id,
+        ];
+
+        $this->request('POST', '/b2_delete_key', [
+            'json' => $json,
+            true
+        ]);
+    }
+
+    /**
      * Authorize the B2 account in order to get an auth token and API/download URLs.
      */
     public function authorizeAccount(bool $forceRefresh = false): void
@@ -892,6 +915,8 @@ class Client
 
     /**
      * Wrapper for $this->client->request.
+     *
+     * @throws RequestException
      *
      * @return mixed|string
      */
