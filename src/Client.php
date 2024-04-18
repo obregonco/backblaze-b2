@@ -15,6 +15,7 @@ use obregonco\B2\Http\Client as HttpClient;
 
 class Client
 {
+    /** @var string */
     protected $accountId;
 
     /**
