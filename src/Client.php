@@ -15,10 +15,11 @@ use obregonco\B2\Http\Client as HttpClient;
 
 class Client
 {
-    /** @var string */
     protected $accountId;
 
-    /** @var \Illuminate\Contracts\Cache\Repository */
+    /**
+     * @var \Illuminate\Contracts\Cache\Repository
+     */
     protected $cache;
 
     protected string $authToken;
@@ -354,7 +355,7 @@ class Client
 
         // B2 returns, at most, 1000 files per "page". Loop through the pages and compile an array of File objects.
         while (true) {
-            $response = $this->request('POST', '/b2_list_file_names', [
+            $response = $this->request('POST', '/b2_list_file_versions', [
                 'json' => [
                     'bucketId' => $options['BucketId'],
                     'prefix' => $prefix,
@@ -405,7 +406,7 @@ class Client
             if (!empty($delimiter)) {
                 $params['delimiter'] = $delimiter;
             }
-            $response = $this->request('POST', '/b2_list_file_names', [
+            $response = $this->request('POST', '/b2_list_file_versions', [
                 'json' => $params,
             ]);
 
@@ -882,6 +883,25 @@ class Client
     }
 
     /**
+     * @throws \RuntimeException
+     */
+    public function retrieveKeys(): array
+    {
+        $json = [
+            'accountId' => $this->accountId,
+            'maxKeyCount' => 10000
+        ];
+
+        /** @var array */
+        $response = $this->request('POST', '/b2_list_keys', [
+            "json" => $json,
+            true
+        ]);
+
+        return $response['keys'];
+    }
+
+    /**
      * Authorize the B2 account in order to get an auth token and API/download URLs.
      */
     public function authorizeAccount(bool $forceRefresh = false): void
@@ -914,8 +934,6 @@ class Client
 
     /**
      * Wrapper for $this->client->request.
-     *
-     * @throws RequestException
      *
      * @return mixed|string
      */
