@@ -73,7 +73,7 @@ $fileContent = $client->download([
 // Delete a file from a bucket. Returns true or false.
 $fileDelete = $client->deleteFileFromArray([
     'FileId' => $file->getId()
-    
+
     // Can also identify the file via bucket and path:
     // 'BucketName' => 'my-special-bucket',
     // 'FileName' => 'path/to/file'
@@ -84,7 +84,7 @@ $fileList = $client->listFilesFromArray([
     'BucketId' => '4d2dbbe08e1e983c5e6f0d12'
 ]);
 
-// Create a new access key
+// Create a new access key.
 $capabilities = new Capabilities()
 $key = $client->createKey($accountId, $name, new Capabilities(
     [Capabilities::DELETE_BUCKETS,
@@ -93,7 +93,14 @@ $key = $client->createKey($accountId, $name, new Capabilities(
 ));
 
 $keyId = $key->getKeyId();
-$applicationKetId = $key->getApplicationKey();
+$applicationKeyId = $key->getApplicationKey();
+
+// Delete an existing access key.
+try {
+    $client->deleteKey($keyId);
+} catch (RequestException $e) {
+    // $e->getCode()
+}
 ```
 
 ## Installation

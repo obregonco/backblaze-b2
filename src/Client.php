@@ -2,6 +2,7 @@
 
 namespace obregonco\B2;
 
+use GuzzleHttp\Exception\RequestException;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Container\Container;
 use Illuminate\Filesystem\Filesystem;
@@ -354,7 +355,7 @@ class Client
 
         // B2 returns, at most, 1000 files per "page". Loop through the pages and compile an array of File objects.
         while (true) {
-            $response = $this->request('POST', '/b2_list_file_names', [
+            $response = $this->request('POST', '/b2_list_file_versions', [
                 'json' => [
                     'bucketId' => $options['BucketId'],
                     'prefix' => $prefix,
@@ -405,7 +406,7 @@ class Client
             if (!empty($delimiter)) {
                 $params['delimiter'] = $delimiter;
             }
-            $response = $this->request('POST', '/b2_list_file_names', [
+            $response = $this->request('POST', '/b2_list_file_versions', [
                 'json' => $params,
             ]);
 
@@ -857,6 +858,47 @@ class Client
             $response['applicationKey'],
             $capabilities
         );
+    }
+
+    /**
+     * Deletes the key having the provided $id from Backblaze.
+     *
+     * @throws RequestException
+     * @throws \InvalidArgumentException
+     */
+    public function deleteKey(string $id): void
+    {
+        if (empty($id)) {
+            throw new \InvalidArgumentException('The key ID is empty.');
+        }
+
+        $json = [
+            'applicationKeyId' => $id,
+        ];
+
+        $this->request('POST', '/b2_delete_key', [
+            'json' => $json,
+            true
+        ]);
+    }
+
+    /**
+     * @throws \RuntimeException
+     */
+    public function retrieveKeys(): array
+    {
+        $json = [
+            'accountId' => $this->accountId,
+            'maxKeyCount' => 10000
+        ];
+
+        /** @var array */
+        $response = $this->request('POST', '/b2_list_keys', [
+            "json" => $json,
+            true
+        ]);
+
+        return $response['keys'];
     }
 
     /**

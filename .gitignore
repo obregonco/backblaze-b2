@@ -2,3 +2,6 @@ vendor/*
 .php_cs-fixer.cache
 .phpstan.cache/
 var/
+composer.lock
+.php-cs-fixer.cache
+phpstan.neon
