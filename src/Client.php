@@ -389,7 +389,8 @@ class Client
         Bucket $bucket,
         string $startFileName = '',
         string $delimiter = '',
-        int $maxFileCount = 1
+        int $maxFileCount = 1,
+        bool $includeFolders = false
     ): array {
         $files = [];
 
@@ -411,8 +412,8 @@ class Client
             ]);
 
             foreach ($response['files'] as $file) {
-                if ('/' === substr($file['fileName'], -1, 1)) {
-                    // Omitir directorios
+                if (!$includeFolders and '/' === substr($file['fileName'], -1, 1)) {
+                    // Skip folders
                     continue;
                 }
                 $files[] = new File($file);
